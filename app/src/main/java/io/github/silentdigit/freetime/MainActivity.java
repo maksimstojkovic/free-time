@@ -70,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         }
 
-
+        TextView locationText = findViewById(R.id.locationTextView);
+        locationText.setText("");
     }
 
     public void updateLocation(View view) {
