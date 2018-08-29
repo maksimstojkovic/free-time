@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateLocation(View view) {
+        //Test comment
         TextView locationText = findViewById(R.id.locationTextView);
         String latLong = String.valueOf(currentLocation.getLatitude()).concat(", ").concat(String.valueOf(currentLocation.getLongitude()));
         locationText.setText(latLong);
