@@ -115,8 +115,6 @@ public class MainActivity extends AppCompatActivity {
                 if (view.getId() == R.id.destinationEditText && keyEvent.getAction() == KeyEvent.ACTION_DOWN &&
                         i == KeyEvent.KEYCODE_ENTER) {
                     setDestination(view);
-
-                    toastMessage();
                     return true;
                 }
                 return false;
