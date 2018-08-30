@@ -43,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                // If user moves a certain distance this method is executed
+                // If user moves more than a pre-determined threshold value, this method is called
                 currentLocation = location;
-                Log.i("Location: ", location.toString());
+                Log.i("Location: ", location.toString()); // Used for debugging
             }
 
             @Override
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        // Perform fine location permissions check, else attempt to update current location
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
@@ -71,18 +72,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         TextView locationText = findViewById(R.id.locationTextView);
-        locationText.setText("");
+        String searchString = "Searching...";
+        locationText.setText(searchString);
     }
 
+    // Used to update the location data on screen upon pressing the update location button
     public void updateLocation(View view) {
         TextView locationText = findViewById(R.id.locationTextView);
-        String latLong = "Nothing";
+        String latLong = "Searching";
         if (currentLocation != null) {
             latLong = String.valueOf(currentLocation.getLatitude()).concat(", ").concat(String.valueOf(currentLocation.getLongitude()));
         }
         locationText.setText(latLong);
     }
 
+    // Method used to transition to MapActivity
     public void intentMap(View view) {
         Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
 
