@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
     // Method used to transition to MapActivity
     public void intentMap(View view) {
         if (currentLocation != null && destination != null &&
-                task.getStatus() != AsyncTask.Status.RUNNING) {
+                task != null && task.getStatus() != AsyncTask.Status.RUNNING) {
             Intent mapsIntent = new Intent(this, MapsActivity.class);
 
             mapsIntent.putExtra("currentLocation", currentLocation);
@@ -204,6 +204,18 @@ public class MainActivity extends AppCompatActivity {
             mapsIntent.putExtra("duration",durationString);
 
             startActivity(mapsIntent);
+        }
+
+        if (destination == null) {
+            toastMessage("Please enter a valid destination");
+        }
+
+        if (currentLocation == null) {
+            toastMessage("Please wait for current location data");
+        }
+
+        if (task != null && task.getStatus() != AsyncTask.Status.RUNNING) {
+            toastMessage("Please wait for destination data");
         }
     }
 
@@ -319,8 +331,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toastMessage() {
-        Toast toast = Toast.makeText(getApplicationContext(),"It worked", Toast.LENGTH_SHORT);
+    private void toastMessage(String s) {
+        Toast toast = Toast.makeText(getApplicationContext(),s, Toast.LENGTH_SHORT);
         toast.show();
     }
 
