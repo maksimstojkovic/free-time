@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (destination != null) {
+                    // TODO: need to implement boolean for whether destination is being changed
                     updateDistance();
                 }
 
@@ -163,6 +164,14 @@ public class MainActivity extends AppCompatActivity {
                 updateDistance();
 
                 Log.i("DestInfo", destAddress.toString());
+            } else {
+                String destString = "Invalid Destination";
+                TextView destTextView = findViewById(R.id.destinationTextView);
+                destTextView.setText(destString);
+
+                destination = null;
+
+                Log.i("DestInfo", "Invalid Destination");
             }
 
         } catch (Exception e) {
@@ -171,9 +180,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateDistance() {
-        TextView distanceTextView = findViewById(R.id.distanceTextView);
-        String distanceString = String.format(Locale.getDefault(), "Distance: %.0f metres", currentLocation.distanceTo(destination));
-        distanceTextView.setText(distanceString);
+
+        if (destination != null) {
+            TextView destTextView = findViewById(R.id.destinationTextView);
+            String destString = destTextView.getText() + "\n" + String.format(Locale.getDefault(), "Distance: %.0f metres", currentLocation.distanceTo(destination));
+            destTextView.setText(destString);
+        }
+
     }
 
     private void toastMessage() {
