@@ -133,9 +133,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Method used to transition to MapActivity
     public void intentMap(View view) {
-        Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
+        //Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
 
-        startActivity(mapIntent);
+        //startActivity(mapIntent);
     }
 
     public void setDestination(View view) {
