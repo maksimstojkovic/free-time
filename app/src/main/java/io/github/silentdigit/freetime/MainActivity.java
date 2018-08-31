@@ -26,10 +26,10 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    LocationManager locationManager;
-    LocationListener locationListener;
-    Location currentLocation;
-    Location destination;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private Location currentLocation;
+    private Location destination;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -76,10 +76,7 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                if (destination != null) {
-                    // TODO: need to implement boolean for whether destination is being changed
-                    updateDistance();
-                }
+                updateDistance();
 
                 Log.i("Location: ", location.toString()); // Used for debugging
             }
@@ -145,46 +142,45 @@ public class MainActivity extends AppCompatActivity {
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 
         try {
-            EditText destText = findViewById(R.id.destinationEditText);
-            List<Address> destAddresses = geocoder.getFromLocationName(destText.getText().toString(), 1);
+            EditText destinationEditText = findViewById(R.id.destinationEditText);
+            List<Address> destinationAddresses = geocoder.getFromLocationName(destinationEditText.getText().toString(), 1);
 
-            if (destAddresses != null && destAddresses.size() > 0) {
-                Address destAddress = destAddresses.get(0);
-                String destString = destAddress.getAddressLine(0) + "\n" +
-                        String.format(Locale.getDefault(), "%.3f, %.3f", destAddress.getLatitude(),destAddress.getLongitude());
+            String destinationString;
 
-
-                TextView destTextView = findViewById(R.id.destinationTextView);
-                destTextView.setText(destString);
+            if (destinationAddresses != null && destinationAddresses.size() > 0) {
+                Address destinationAddress = destinationAddresses.get(0);
+                destinationString = destinationAddress.getAddressLine(0) + "\n" +
+                        String.format(Locale.getDefault(), "%.3f, %.3f", destinationAddress.getLatitude(),destinationAddress.getLongitude());
 
                 destination = new Location("");
-                destination.setLatitude(destAddress.getLatitude());
-                destination.setLongitude(destAddress.getLongitude());
+                destination.setLatitude(destinationAddress.getLatitude());
+                destination.setLongitude(destinationAddress.getLongitude());
 
-                updateDistance();
-
-                Log.i("DestInfo", destAddress.toString());
+                Log.i("DestInfo", destinationAddress.toString());
             } else {
-                String destString = "Invalid Destination";
-                TextView destTextView = findViewById(R.id.destinationTextView);
-                destTextView.setText(destString);
+                destinationString = "Invalid Destination";
 
                 destination = null;
 
                 Log.i("DestInfo", "Invalid Destination");
             }
 
+            TextView destTextView = findViewById(R.id.destinationTextView);
+            destTextView.setText(destinationString);
+
+            updateDistance();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    // Method used to update distanceTextView to display distance between current location and destination
     private void updateDistance() {
-
         if (destination != null) {
-            TextView destTextView = findViewById(R.id.destinationTextView);
-            String destString = destTextView.getText() + "\n" + String.format(Locale.getDefault(), "Distance: %.0f metres", currentLocation.distanceTo(destination));
-            destTextView.setText(destString);
+            TextView distanceTextView = findViewById(R.id.distanceTextView);
+            String distanceString = String.format(Locale.getDefault(), "Distance: %.0f metres", currentLocation.distanceTo(destination));
+            distanceTextView.setText(distanceString);
         }
 
     }
