@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
             toastMessage("Please wait for current location data");
         }
 
-        if (task != null && task.getStatus() != AsyncTask.Status.RUNNING) {
+        if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) {
             toastMessage("Please wait for destination data");
         }
     }
