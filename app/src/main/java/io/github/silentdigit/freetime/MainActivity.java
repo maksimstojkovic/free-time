@@ -22,7 +22,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InputStream;
@@ -38,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     LocationListener locationListener;
     Location currentLocation;
     Location destination;
+    String distanceString;
+    String durationString;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -193,8 +194,13 @@ public class MainActivity extends AppCompatActivity {
     public void intentMap(View view) {
         if (currentLocation != null && destination != null) {
             Intent mapsIntent = new Intent(this, MapsActivity.class);
+
             mapsIntent.putExtra("currentLocation", currentLocation);
             mapsIntent.putExtra("destination", destination);
+
+            mapsIntent.putExtra("distance",distanceString);
+            mapsIntent.putExtra("duration",durationString);
+
             startActivity(mapsIntent);
         }
     }
@@ -202,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
     // Method used to update distanceTextView to display distance between current location and destination
     private void updateDistance(int distance) {
         TextView distanceTextView = findViewById(R.id.distanceTextView);
-        String distanceString;
+        String dist;
 
 //        Log.i("JSON Distance2", Integer.toString(distance));
 
@@ -216,20 +222,21 @@ public class MainActivity extends AppCompatActivity {
 
         if (estimate < 1000) {
             estimate = Math.round(estimate/10.0) * 10;
-            distanceString = String.format(Locale.getDefault(), "Distance: %.0f m", estimate);
+            dist = String.format(Locale.getDefault(), "Distance: %.0f m", estimate);
+            distanceString = String.format(Locale.getDefault(), "%.0f m", estimate);
         } else {
             estimate = estimate / 1000;
-            distanceString = String.format(Locale.getDefault(), "Distance: %.1f km", estimate);
+            dist = String.format(Locale.getDefault(), "Distance: %.1f km", estimate);
+            distanceString = String.format(Locale.getDefault(), "%.1f km", estimate);
         }
 
-
-
-        distanceTextView.setText(distanceString);
+        distanceTextView.setText(dist);
     }
 
     // Method used to update durationTextView to display total transit time
     public void updateDuration(String duration) {
         TextView durationTextView = findViewById(R.id.durationTextView);
+        durationString = duration;
 
         if (!duration.equals("")) {
             duration = "Transit Time: " + duration;

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -15,6 +16,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.w3c.dom.Text;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +30,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     Location currentLocation;
     Location destination;
+    String distanceString;
+    String durationString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,12 +41,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = getIntent();
         currentLocation = intent.getParcelableExtra("currentLocation");
         destination = intent.getParcelableExtra("destination");
+        distanceString = intent.getStringExtra("distance");
+        durationString = intent.getStringExtra("duration");
 
+        if (distanceString == null) {
+            distanceString = "";
+        }
+
+        if (durationString == null) {
+            durationString = "";
+        }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        TextView mapDistanceTextView = findViewById(R.id.mapDistanceTextView);
+        mapDistanceTextView.setText("");
+
+        TextView mapDurationTextView = findViewById(R.id.mapDurationTextView);
+        mapDurationTextView.setText("");
     }
 
 
@@ -63,6 +83,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng dest = new LatLng(destination.getLatitude(), destination.getLongitude());
         mMap.addMarker(new MarkerOptions().position(curr).title("Current Location"));
         mMap.addMarker(new MarkerOptions().position(dest).title("Destination"));
+
+        TextView mapDistanceTextView = findViewById(R.id.mapDistanceTextView);
+        mapDistanceTextView.setText(distanceString);
+
+        TextView mapDurationTextView = findViewById(R.id.mapDurationTextView);
+        mapDurationTextView.setText(durationString);
 
         LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
 
