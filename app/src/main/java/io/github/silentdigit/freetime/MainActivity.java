@@ -9,6 +9,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -21,15 +22,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private LocationManager locationManager;
-    private LocationListener locationListener;
-    private Location currentLocation;
-    private Location destination;
+    LocationManager locationManager;
+    LocationListener locationListener;
+    Location currentLocation;
+    Location destination;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -37,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 15000, 0, locationListener);
             }
         }
     }
@@ -76,9 +84,11 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                updateDistance();
+                if (currentLocation != null && destination != null) {
+                    updateTravelData();
+                }
 
-                Log.i("Location: ", location.toString()); // Used for debugging
+//                Log.i("Location: ", location.toString()); // Used for debugging
             }
 
             @Override
@@ -101,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 20, locationListener);
         }
 
         // KeyListener for destinationEditText
@@ -124,18 +134,14 @@ public class MainActivity extends AppCompatActivity {
         String searchString = "Searching...";
         locationText.setText(searchString);
 
-        TextView destinationText = findViewById(R.id.destinationTextView);
-        destinationText.setText("");
+        TextView destinationTextView = findViewById(R.id.destinationTextView);
+        destinationTextView.setText("");
 
-        TextView distanceText = findViewById(R.id.distanceTextView);
-        distanceText.setText("");
-    }
+        TextView distanceTextView = findViewById(R.id.distanceTextView);
+        distanceTextView.setText("");
 
-    // Method used to transition to MapActivity
-    public void intentMap(View view) {
-        //Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
-
-        //startActivity(mapIntent);
+        TextView durationTextView = findViewById(R.id.durationTextView);
+        durationTextView.setText("");
     }
 
     public void setDestination(View view) {
@@ -156,33 +162,152 @@ public class MainActivity extends AppCompatActivity {
                 destination.setLatitude(destinationAddress.getLatitude());
                 destination.setLongitude(destinationAddress.getLongitude());
 
-                Log.i("DestInfo", destinationAddress.toString());
+//                Log.i("DestInfo", destinationAddress.toString());
             } else {
                 destinationString = "Invalid Destination";
 
+                TextView distanceTextView = findViewById(R.id.distanceTextView);
+                distanceTextView.setText("");
+
+                TextView durationTextView = findViewById(R.id.durationTextView);
+                durationTextView.setText("");
+
                 destination = null;
 
-                Log.i("DestInfo", "Invalid Destination");
+//                Log.i("DestInfo", "Invalid Destination");
             }
 
             TextView destTextView = findViewById(R.id.destinationTextView);
             destTextView.setText(destinationString);
 
-            updateDistance();
+            if (currentLocation != null && destination != null) {
+                updateTravelData();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    // Method used to transition to MapActivity
+    public void intentMap(View view) {
+        if (currentLocation != null && destination != null) {
+            Intent mapsIntent = new Intent(this, MapsActivity.class);
+            mapsIntent.putExtra("currentLocation", currentLocation);
+            mapsIntent.putExtra("destination", destination);
+            startActivity(mapsIntent);
+        }
+    }
+
     // Method used to update distanceTextView to display distance between current location and destination
-    private void updateDistance() {
-        if (destination != null) {
-            TextView distanceTextView = findViewById(R.id.distanceTextView);
-            String distanceString = String.format(Locale.getDefault(), "Distance: %.0f metres", currentLocation.distanceTo(destination));
-            distanceTextView.setText(distanceString);
+    private void updateDistance(int distance) {
+        TextView distanceTextView = findViewById(R.id.distanceTextView);
+        String distanceString;
+
+//        Log.i("JSON Distance2", Integer.toString(distance));
+
+        double estimate;
+
+        if (distance < 0) {
+            estimate = currentLocation.distanceTo(destination);
+        } else {
+            estimate = (double) distance;
         }
 
+        if (estimate < 1000) {
+            estimate = Math.round(estimate/10.0) * 10;
+            distanceString = String.format(Locale.getDefault(), "Distance: %.0f m", estimate);
+        } else {
+            estimate = estimate / 1000;
+            distanceString = String.format(Locale.getDefault(), "Distance: %.1f km", estimate);
+        }
+
+
+
+        distanceTextView.setText(distanceString);
+    }
+
+    // Method used to update durationTextView to display total transit time
+    public void updateDuration(String duration) {
+        TextView durationTextView = findViewById(R.id.durationTextView);
+
+        if (!duration.equals("")) {
+            duration = "Transit Time: " + duration;
+        }
+
+        durationTextView.setText(duration);
+    }
+
+    public void updateTravelData() {
+        TransitDataTask task = new TransitDataTask();
+        String url = "https://maps.googleapis.com/maps/api/directions/json?origin=" +
+                currentLocation.getLatitude() + "," + currentLocation.getLongitude() +
+                "&destination=" + destination.getLatitude() + "," + destination.getLongitude() +
+                "&key=" + getString(R.string.google_maps_key);
+        task.execute(url);
+    }
+
+    public class TransitDataTask extends AsyncTask<String,Void,String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            StringBuilder result = new StringBuilder();
+            URL url;
+            HttpURLConnection urlConnection;
+
+            try {
+                url = new URL(urls[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                InputStream in = urlConnection.getInputStream();
+                InputStreamReader reader = new InputStreamReader(in);
+
+                int data = reader.read();
+
+                while (data != -1) {
+                    char current = (char) data;
+                    result.append(current);
+                    data = reader.read();
+                }
+
+                return result.toString();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+//            Log.i("JSON", s);
+
+            int distance = -1;
+            String duration = "";
+
+            try {
+                JSONObject jsonObject = new JSONObject(s);
+
+                JSONObject travelInfo = jsonObject.getJSONArray("routes").getJSONObject(0)
+                        .getJSONArray("legs").getJSONObject(0);
+                Log.i("JSON", travelInfo.toString());
+
+                distance = Integer.parseInt(travelInfo.getJSONObject("distance").getString("value"));
+                duration = travelInfo.getJSONObject("duration").getString("text");
+
+                Log.i("JSON Distance", Integer.toString(distance));
+                Log.i("JSON Duration", duration);
+
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            updateDistance(distance);
+            updateDuration(duration);
+
+        }
     }
 
     private void toastMessage() {
