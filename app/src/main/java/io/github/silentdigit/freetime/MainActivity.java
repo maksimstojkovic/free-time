@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     Location destination;
     String distanceString;
     String durationString;
+    TransitDataTask task;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -192,7 +193,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Method used to transition to MapActivity
     public void intentMap(View view) {
-        if (currentLocation != null && destination != null) {
+        if (currentLocation != null && destination != null &&
+                task.getStatus() != AsyncTask.Status.RUNNING) {
             Intent mapsIntent = new Intent(this, MapsActivity.class);
 
             mapsIntent.putExtra("currentLocation", currentLocation);
@@ -246,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateTravelData() {
-        TransitDataTask task = new TransitDataTask();
+        task = new TransitDataTask();
         String url = "https://maps.googleapis.com/maps/api/directions/json?origin=" +
                 currentLocation.getLatitude() + "," + currentLocation.getLongitude() +
                 "&destination=" + destination.getLatitude() + "," + destination.getLongitude() +
