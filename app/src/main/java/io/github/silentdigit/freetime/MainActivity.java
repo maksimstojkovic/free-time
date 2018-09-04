@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
         String url = "https://maps.googleapis.com/maps/api/directions/json?origin=" +
                 currentLocation.getLatitude() + "," + currentLocation.getLongitude() +
                 "&destination=" + destination.getLatitude() + "," + destination.getLongitude() +
-                "&key=" + getString(R.string.google_maps_key);
+                "&key=" + getString(R.string.google_maps_key) + "&mode=walking";
         task.execute(url);
     }
 
