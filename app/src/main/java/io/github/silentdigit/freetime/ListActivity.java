@@ -9,18 +9,20 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.PriorityQueue;
@@ -30,6 +32,8 @@ public class ListActivity extends AppCompatActivity {
     LocationManager locationManager;
     LocationListener locationListener;
     Location currentLocation;
+    PriorityQueue <UserTask> taskQueue;
+    ArrayList<UserTask> taskList;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -38,8 +42,8 @@ public class ListActivity extends AppCompatActivity {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
-                locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
+//                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
+//                locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
             }
         }
     }
@@ -48,6 +52,10 @@ public class ListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+        TextView locationText = findViewById(R.id.locationListTextView);
+        String searchString = "Searching...";
+        locationText.setText(searchString);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -58,7 +66,7 @@ public class ListActivity extends AppCompatActivity {
                 currentLocation = location;
 
                 String latLong = String.format(Locale.getDefault(), "%.3f, %.3f", location.getLatitude(), location.getLongitude());
-                TextView locationText = findViewById(R.id.locationTextView);
+                TextView locationText = findViewById(R.id.locationListTextView);
                 locationText.setText(latLong);
 
                 Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
@@ -77,6 +85,20 @@ public class ListActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                if (taskQueue != null && taskQueue.size() > 0) {
+
+                    for (UserTask task:taskQueue) {
+                        task.updateTravelData(currentLocation, getApplicationContext());
+                    }
+
+                    PriorityQueue<UserTask> temp = new PriorityQueue<>(taskQueue);
+                    taskQueue = temp;
+
+                    updateListView();
+                }
+
+
 //                TODO: Check if this is usable for updating transit times, might need to write another method to update time and distance for all tasks
 //                if (currentLocation != null && destination != null) {
 //                    updateTravelData();
@@ -101,61 +123,58 @@ public class ListActivity extends AppCompatActivity {
             }
         };
 
+        UserTask sampleTaskOne = new UserTask("Group Meeting", "State Library Sydney", currentLocation,this);
+        UserTask sampleTaskTwo = new UserTask("Uni Supplies", "Camperdown Officeworks", currentLocation,this);
+        UserTask sampleTaskThree = new UserTask("Buy Lunch", "Subway Usyd", currentLocation,this);
+
+        taskQueue = new PriorityQueue<>();
+
+        taskQueue.add(sampleTaskOne);
+        taskQueue.add(sampleTaskTwo);
+        taskQueue.add(sampleTaskThree);
+
         // Perform fine location permissions check, else attempt to update current location
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
+//            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
+//            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
         }
+    }
 
-        Comparator<UserTask> taskComparator = new Comparator<UserTask>() {
+    private void updateListView() {
+        // Updates taskListView to display list of active tasks in taskQueue
+        ListView taskListView = findViewById(R.id.taskListView);
+        UserTask[] taskArray = taskQueue.toArray(new UserTask[0]);
+        Arrays.sort(taskArray);
+        taskList = new ArrayList<>(Arrays.asList(taskArray));
+        ArrayAdapter<UserTask> taskAdapter = new ArrayAdapter<UserTask>(this,android.R.layout.simple_list_item_2,android.R.id.text1,taskList) {
+            @NonNull
             @Override
-            public int compare(UserTask t1, UserTask t2) {
-                if (t1.getTime() < t2.getTime()) {
-                    return -1;
-                } else if (t1.getTime() > t2.getTime()) {
-                    return 1;
-                } else {
-                    return 0;
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+
+                TextView text1 = view.findViewById(android.R.id.text1);
+                TextView text2 = view.findViewById(android.R.id.text2);
+
+                text1.setText(taskList.get(position).getTaskName());
+
+                String addTimeDist = taskList.get(position).getTaskAddress() + "\n" +
+                        taskList.get(position).getTaskTime();
+
+                if (!taskList.get(position).getTaskDistanceString().equals("")) {
+                    addTimeDist += " - " + taskList.get(position).getTaskDistanceString();
                 }
+
+                text2.setLineSpacing(-20f,1f);
+                text2.setText(addTimeDist);
+
+                return view;
             }
         };
 
-        PriorityQueue <UserTask> taskQueue = new PriorityQueue<>(taskComparator);
-
-//        String[] sampleTaskArray = {"",""};
-//        ArrayList<String> sampleTaskList = new ArrayList<>(Arrays.asList(sampleTaskArray));
-
-
-//        try {
-//            List<Address> taskAddresses = geocoder.getFromLocationName("", 1);
-//            String taskString;
-//
-//            if (taskAddresses != null && taskAddresses.size() > 0) {
-//                Address taskAddress = taskAddresses.get(0);
-//                taskString = taskAddress.getAddressLine(0) + "\n" +
-//                        String.format(Locale.getDefault(), "%.3f, %.3f", taskAddress.getLatitude(),taskAddress.getLongitude());
-//
-//                destination = new Location("");
-//                destination.setLatitude(destinationAddress.getLatitude());
-//                destination.setLongitude(destinationAddress.getLongitude());
-//
-////                Log.i("DestInfo", destinationAddress.toString());
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-        // Updates taskListView to display list of active tasks in taskQueue
-        ListView taskListView = findViewById(R.id.taskListView);
-        ArrayList<UserTask> taskList = new ArrayList<>(Arrays.asList(taskQueue.toArray(new UserTask[0])));
-        ArrayAdapter<UserTask> taskAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,taskList);
-
         taskListView.setAdapter(taskAdapter);
-
     }
-
 
 }
