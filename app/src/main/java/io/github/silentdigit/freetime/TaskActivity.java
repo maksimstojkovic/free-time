@@ -31,7 +31,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class TaskActivity extends AppCompatActivity {
 
     LocationManager locationManager;
     LocationListener locationListener;
@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateTravelData() {
-        task = new TransitDataTask();
+        task = new TaskActivity.TransitDataTask();
         String url = "https://maps.googleapis.com/maps/api/directions/json?origin=" +
                 currentLocation.getLatitude() + "," + currentLocation.getLongitude() +
                 "&destination=" + destination.getLatitude() + "," + destination.getLongitude() +
@@ -340,11 +340,4 @@ public class MainActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(getApplicationContext(),s, Toast.LENGTH_SHORT);
         toast.show();
     }
-
-
-
-
-
-
-
 }
