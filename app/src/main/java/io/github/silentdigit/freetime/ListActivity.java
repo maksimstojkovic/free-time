@@ -2,12 +2,15 @@ package io.github.silentdigit.freetime;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,8 +37,8 @@ public class ListActivity extends AppCompatActivity {
     LocationManager locationManager;
     LocationListener locationListener;
     Location currentLocation;
-    PriorityQueue <UserTask> taskQueue;
-    ArrayList<UserTask> taskList;
+    String currentLocationString;
+    ArrayList<UserTask> taskQueue;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -64,7 +68,7 @@ public class ListActivity extends AppCompatActivity {
         UserTask sampleTaskFour = new UserTask("ENGG2062 Lecture", "Merewether Usyd", currentLocation,this);
         UserTask sampleTaskFive = new UserTask("Basketball Game", "Marrickville PCYC", currentLocation,this);
 
-        taskQueue = new PriorityQueue<>();
+        taskQueue = new ArrayList<>();
 
         taskQueue.add(sampleTaskOne);
         taskQueue.add(sampleTaskTwo);
@@ -93,7 +97,8 @@ public class ListActivity extends AppCompatActivity {
 
                     if (listAddresses != null && listAddresses.size() > 0) {
                         Address currentAddress = listAddresses.get(0);
-                        String addString = currentAddress.getAddressLine(0) + "\n" + locationText.getText();
+                        currentLocationString = currentAddress.getAddressLine(0);
+                        String addString = currentLocationString + "\n" + locationText.getText();
                         locationText.setText(addString);
 
                         Log.i("PlaceInfo", currentAddress.toString());
@@ -109,10 +114,15 @@ public class ListActivity extends AppCompatActivity {
                         task.updateTravelData(currentLocation, getApplicationContext());
                     }
 
-                    PriorityQueue<UserTask> temp = new PriorityQueue<>(taskQueue);
-                    taskQueue = temp;
+                    Runnable updater = new Runnable() {
+                        @Override
+                        public void run() {
+                            updateListView();
+                        }
+                    };
 
-                    updateListView();
+                    new Handler().postDelayed(updater,2000);
+
                 }
 
 //                TODO: Check if this is usable for updating transit times, might need to write another method to update time and distance for all tasks
@@ -153,7 +163,24 @@ public class ListActivity extends AppCompatActivity {
         taskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                
+                if (currentLocation != null) {
+//                    for(UserTask task:taskList) {
+//                        if (task.getTaskUpdate().getStatus().equals(AsyncTask.Status.RUNNING)) {
+//                            task.getTaskUpdate().cancel(true);
+//                        }
+//                    }
+
+                    Intent taskIntent = new Intent(getApplicationContext(), TaskActivity.class);
+
+                    taskIntent.putExtra("currentLocation", currentLocation);
+                    taskIntent.putExtra("currentLocationString", currentLocationString);
+                    Log.i("Loc String", currentLocationString);
+                    taskIntent.putExtra("userTask", taskQueue.get(i));
+
+                    startActivity(taskIntent);
+                } else {
+                    toastMessage("Please wait for current location data");
+                }
             }
         });
 
@@ -164,8 +191,8 @@ public class ListActivity extends AppCompatActivity {
         ListView taskListView = findViewById(R.id.taskListView);
         UserTask[] taskArray = taskQueue.toArray(new UserTask[0]);
         Arrays.sort(taskArray);
-        taskList = new ArrayList<>(Arrays.asList(taskArray));
-        ArrayAdapter<UserTask> taskAdapter = new ArrayAdapter<UserTask>(this,android.R.layout.simple_list_item_2,android.R.id.text1,taskList) {
+        taskQueue = new ArrayList<>(Arrays.asList(taskArray));
+        ArrayAdapter<UserTask> taskAdapter = new ArrayAdapter<UserTask>(this,android.R.layout.simple_list_item_2,android.R.id.text1,taskQueue) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -174,18 +201,18 @@ public class ListActivity extends AppCompatActivity {
                 TextView text1 = view.findViewById(android.R.id.text1);
                 TextView text2 = view.findViewById(android.R.id.text2);
 
-                String nameLoc = taskList.get(position).getTaskName(); // + " - " + taskList.get(position).getTaskLocationString()
+                String nameLoc = taskQueue.get(position).getTaskName(); // + " - " + taskList.get(position).getTaskLocationString()
 
                 text1.setText(nameLoc);
 
-                String addTimeDist = taskList.get(position).getTaskAddress() + "\n" +
-                        taskList.get(position).getTaskTime();
+                String addTimeDist = taskQueue.get(position).getTaskAddress() + "\n" +
+                        taskQueue.get(position).getTaskTime();
 
-                if (!taskList.get(position).getTaskDistanceString().equals("")) {
-                    addTimeDist += " - " + taskList.get(position).getTaskDistanceString();
+                if (!taskQueue.get(position).getTaskDistanceString().equals("")) {
+                    addTimeDist += " - " + taskQueue.get(position).getTaskDistanceString();
                 }
 
-                text2.setLineSpacing(-20f,1f);
+                text2.setLineSpacing(5f,1f);
                 text2.setText(addTimeDist);
 
                 return view;
@@ -193,6 +220,12 @@ public class ListActivity extends AppCompatActivity {
         };
 
         taskListView.setAdapter(taskAdapter);
+    }
+
+
+    private void toastMessage(String s) {
+        Toast toast = Toast.makeText(getApplicationContext(),s, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
 }

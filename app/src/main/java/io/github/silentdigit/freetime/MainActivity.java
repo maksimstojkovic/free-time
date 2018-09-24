@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
-                locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
+//                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
+//                locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
             }
         }
     }
@@ -116,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
+//            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
+//            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
         }
 
         // KeyListener for destinationEditText
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         String searchString = "Searching...";
         locationText.setText(searchString);
 
-        TextView destinationTextView = findViewById(R.id.destinationTextView);
+        TextView destinationTextView = findViewById(R.id.addLongTextView);
         destinationTextView.setText("");
 
         TextView distanceTextView = findViewById(R.id.distanceTextView);
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 //                Log.i("DestInfo", "Invalid Destination");
             }
 
-            TextView destTextView = findViewById(R.id.destinationTextView);
+            TextView destTextView = findViewById(R.id.addLongTextView);
             destTextView.setText(destinationString);
 
             if (currentLocation != null && destination != null) {

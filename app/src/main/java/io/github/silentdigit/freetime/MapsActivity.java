@@ -30,6 +30,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     Location currentLocation;
     Location destination;
+    UserTask currentTask;
     String distanceString;
     String durationString;
 
@@ -40,7 +41,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Intent intent = getIntent();
         currentLocation = intent.getParcelableExtra("currentLocation");
-        destination = intent.getParcelableExtra("destination");
+        currentTask = intent.getParcelableExtra("currentTask");
+//        destination = intent.getParcelableExtra("destination");
         distanceString = intent.getStringExtra("distance");
         durationString = intent.getStringExtra("duration");
 
@@ -80,7 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Add markers to map
         LatLng curr = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        LatLng dest = new LatLng(destination.getLatitude(), destination.getLongitude());
+        LatLng dest = new LatLng(currentTask.getTaskLocation().getLatitude(), currentTask.getTaskLocation().getLongitude());
         mMap.addMarker(new MarkerOptions().position(curr).title("Current Location"));
         mMap.addMarker(new MarkerOptions().position(dest).title("Destination"));
 

@@ -67,7 +67,7 @@
         app:layout_constraintTop_toBottomOf="@+id/enterDestinationTextView" />
 
     <TextView
-        android:id="@+id/destinationTextView"
+        android:id="@+id/addLongTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -87,7 +87,8 @@
         app:layout_constraintBottom_toTopOf="@+id/durationTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/destinationTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/addLongTextView"
+        app:layout_constraintVertical_chainStyle="spread_inside" />
 
     <TextView
         android:id="@+id/durationTextView"
