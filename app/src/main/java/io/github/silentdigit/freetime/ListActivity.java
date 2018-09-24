@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -56,6 +57,22 @@ public class ListActivity extends AppCompatActivity {
         TextView locationText = findViewById(R.id.locationListTextView);
         String searchString = "Searching...";
         locationText.setText(searchString);
+
+        UserTask sampleTaskOne = new UserTask("Group Meeting", "State Library Sydney", currentLocation,this);
+        UserTask sampleTaskTwo = new UserTask("Buy Uni Supplies", "Camperdown Officeworks", currentLocation,this);
+        UserTask sampleTaskThree = new UserTask("Buy Lunch", "Subway Usyd", currentLocation,this);
+        UserTask sampleTaskFour = new UserTask("ENGG2062 Lecture", "Merewether Usyd", currentLocation,this);
+        UserTask sampleTaskFive = new UserTask("Basketball Game", "Marrickville PCYC", currentLocation,this);
+
+        taskQueue = new PriorityQueue<>();
+
+        taskQueue.add(sampleTaskOne);
+        taskQueue.add(sampleTaskTwo);
+        taskQueue.add(sampleTaskThree);
+        taskQueue.add(sampleTaskFour);
+        taskQueue.add(sampleTaskFive);
+
+        updateListView();
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -98,7 +115,6 @@ public class ListActivity extends AppCompatActivity {
                     updateListView();
                 }
 
-
 //                TODO: Check if this is usable for updating transit times, might need to write another method to update time and distance for all tasks
 //                if (currentLocation != null && destination != null) {
 //                    updateTravelData();
@@ -123,16 +139,6 @@ public class ListActivity extends AppCompatActivity {
             }
         };
 
-        UserTask sampleTaskOne = new UserTask("Group Meeting", "State Library Sydney", currentLocation,this);
-        UserTask sampleTaskTwo = new UserTask("Uni Supplies", "Camperdown Officeworks", currentLocation,this);
-        UserTask sampleTaskThree = new UserTask("Buy Lunch", "Subway Usyd", currentLocation,this);
-
-        taskQueue = new PriorityQueue<>();
-
-        taskQueue.add(sampleTaskOne);
-        taskQueue.add(sampleTaskTwo);
-        taskQueue.add(sampleTaskThree);
-
         // Perform fine location permissions check, else attempt to update current location
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -141,6 +147,16 @@ public class ListActivity extends AppCompatActivity {
 //            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
 //            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
         }
+
+        ListView taskListView = findViewById(R.id.taskListView);
+
+        taskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                
+            }
+        });
+
     }
 
     private void updateListView() {
@@ -158,7 +174,9 @@ public class ListActivity extends AppCompatActivity {
                 TextView text1 = view.findViewById(android.R.id.text1);
                 TextView text2 = view.findViewById(android.R.id.text2);
 
-                text1.setText(taskList.get(position).getTaskName());
+                String nameLoc = taskList.get(position).getTaskName(); // + " - " + taskList.get(position).getTaskLocationString()
+
+                text1.setText(nameLoc);
 
                 String addTimeDist = taskList.get(position).getTaskAddress() + "\n" +
                         taskList.get(position).getTaskTime();
