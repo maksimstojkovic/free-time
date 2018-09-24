@@ -39,6 +39,7 @@ public class ListActivity extends AppCompatActivity {
     Location currentLocation;
     String currentLocationString;
     ArrayList<UserTask> taskQueue;
+    boolean startup;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -48,7 +49,7 @@ public class ListActivity extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
 //                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
-//                locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
+                locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
             }
         }
     }
@@ -57,6 +58,8 @@ public class ListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+        startup = true;
 
         TextView locationText = findViewById(R.id.locationListTextView);
         String searchString = "Searching...";
@@ -110,27 +113,24 @@ public class ListActivity extends AppCompatActivity {
 
                 if (taskQueue != null && taskQueue.size() > 0) {
 
+
                     for (UserTask task:taskQueue) {
                         task.updateTravelData(currentLocation, getApplicationContext());
                     }
 
-                    Runnable updater = new Runnable() {
-                        @Override
-                        public void run() {
-                            updateListView();
-                        }
-                    };
-
-                    new Handler().postDelayed(updater,2000);
-
+                    if (startup) {
+                        startup = false;
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateListView();
+                            }
+                        }, 2000);
+                    } else {
+                        updateListView();
+                    }
                 }
-
-//                TODO: Check if this is usable for updating transit times, might need to write another method to update time and distance for all tasks
-//                if (currentLocation != null && destination != null) {
-//                    updateTravelData();
-//                }
-
-//                Log.i("Location: ", location.toString()); // Used for debugging
             }
 
             @Override
@@ -155,7 +155,7 @@ public class ListActivity extends AppCompatActivity {
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
 //            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, locationListener);
-//            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 0, locationListener);
         }
 
         ListView taskListView = findViewById(R.id.taskListView);
@@ -164,12 +164,6 @@ public class ListActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (currentLocation != null) {
-//                    for(UserTask task:taskList) {
-//                        if (task.getTaskUpdate().getStatus().equals(AsyncTask.Status.RUNNING)) {
-//                            task.getTaskUpdate().cancel(true);
-//                        }
-//                    }
-
                     Intent taskIntent = new Intent(getApplicationContext(), TaskActivity.class);
 
                     taskIntent.putExtra("currentLocation", currentLocation);
