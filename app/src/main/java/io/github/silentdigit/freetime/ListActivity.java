@@ -126,7 +126,7 @@ public class ListActivity extends AppCompatActivity {
                             public void run() {
                                 updateListView();
                             }
-                        }, 2500);
+                        }, 3000);
                     } else {
                         updateListView();
                     }
