@@ -1,9 +1,11 @@
 package io.github.silentdigit.freetime;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +28,12 @@ public class TaskActivity extends AppCompatActivity {
         currentLocationString = intent.getStringExtra("currentLocationString");
         currentTask = intent.getParcelableExtra("userTask");
 
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//            getSupportActionBar().setDisplayShowHomeEnabled(true);
+//            getSupportActionBar().setLogo(R.drawable.logo);
+//            getSupportActionBar().setDisplayUseLogoEnabled(true);
+        }
 
         String currentLatLong = String.format(Locale.getDefault(), "%.3f, %.3f", currentLocation.getLatitude(), currentLocation.getLongitude());
         String currentAddLatLong = currentLocationString + "\n" + currentLatLong;
@@ -76,4 +84,14 @@ public class TaskActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(getApplicationContext(),s, Toast.LENGTH_SHORT);
         toast.show();
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id==android.R.id.home) {
+            finish();
+        }
+        return true;
+    }
+
 }

@@ -18,6 +18,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -40,6 +41,7 @@ public class ListActivity extends AppCompatActivity {
     String currentLocationString;
     ArrayList<UserTask> taskQueue;
     boolean startup;
+    ArrayAdapter<UserTask> taskAdapter;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -48,8 +50,8 @@ public class ListActivity extends AppCompatActivity {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, locationListener);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 0, locationListener);
-                locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 3000, 0, locationListener);
+//                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 0, locationListener);
+//                locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 3000, 0, locationListener);
             }
         }
     }
@@ -61,6 +63,12 @@ public class ListActivity extends AppCompatActivity {
 
         startup = true;
 
+//        if (getSupportActionBar() != null) {
+//            getSupportActionBar().setDisplayShowHomeEnabled(true);
+//            getSupportActionBar().setLogo(R.drawable.logo);
+//            getSupportActionBar().setDisplayUseLogoEnabled(true);
+//        }
+
         TextView locationText = findViewById(R.id.locationListTextView);
         String searchString = "Searching...";
         locationText.setText(searchString);
@@ -70,6 +78,12 @@ public class ListActivity extends AppCompatActivity {
         UserTask sampleTaskThree = new UserTask("Buy Lunch", "Subway Usyd", currentLocation,this);
         UserTask sampleTaskFour = new UserTask("ENGG2062 Lecture", "Merewether Usyd", currentLocation,this);
         UserTask sampleTaskFive = new UserTask("Basketball Game", "Marrickville PCYC", currentLocation,this);
+        UserTask sampleTaskSix = new UserTask("Gym - Leg Day", "SUSF Usyd", currentLocation,this);
+        UserTask sampleTaskSeven = new UserTask("Weekly Groceries", "Burwood Westfield", currentLocation,this);
+        UserTask sampleTaskEight = new UserTask("SU:CC Meetup", "Bobbin Head", currentLocation,this);
+        UserTask sampleTaskNine = new UserTask("Practice Skateboarding", "Darrell Jackson Gardens", currentLocation,this);
+        UserTask sampleTaskTen = new UserTask("SUEUA Pub Crawl", "The Royal Camperdown", currentLocation,this);
+        UserTask sampleTaskEleven = new UserTask("Engineering Ball", "Sheraton on the Park", currentLocation,this);
 
         taskQueue = new ArrayList<>();
 
@@ -78,6 +92,12 @@ public class ListActivity extends AppCompatActivity {
         taskQueue.add(sampleTaskThree);
         taskQueue.add(sampleTaskFour);
         taskQueue.add(sampleTaskFive);
+        taskQueue.add(sampleTaskSix);
+        taskQueue.add(sampleTaskSeven);
+        taskQueue.add(sampleTaskEight);
+        taskQueue.add(sampleTaskNine);
+        taskQueue.add(sampleTaskTen);
+        taskQueue.add(sampleTaskEleven);
 
         updateListView();
 
@@ -128,7 +148,13 @@ public class ListActivity extends AppCompatActivity {
                             }
                         }, 3000);
                     } else {
-                        updateListView();
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateListView();
+                            }
+                        }, 2000);
                     }
                 }
             }
@@ -154,8 +180,8 @@ public class ListActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 3000, 0, locationListener);
+//            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 0, locationListener);
+//            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 3000, 0, locationListener);
         }
 
         ListView taskListView = findViewById(R.id.taskListView);
@@ -186,34 +212,42 @@ public class ListActivity extends AppCompatActivity {
         UserTask[] taskArray = taskQueue.toArray(new UserTask[0]);
         Arrays.sort(taskArray);
         taskQueue = new ArrayList<>(Arrays.asList(taskArray));
-        ArrayAdapter<UserTask> taskAdapter = new ArrayAdapter<UserTask>(this,android.R.layout.simple_list_item_2,android.R.id.text1,taskQueue) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
 
-                TextView text1 = view.findViewById(android.R.id.text1);
-                TextView text2 = view.findViewById(android.R.id.text2);
+        if (taskAdapter == null) {
+            taskAdapter = new ArrayAdapter<UserTask>(this,android.R.layout.simple_list_item_2,android.R.id.text1,taskQueue) {
+                @NonNull
+                @Override
+                public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                    View view = super.getView(position, convertView, parent);
 
-                String nameLoc = taskQueue.get(position).getTaskName(); // + " - " + taskList.get(position).getTaskLocationString()
+                    TextView text1 = view.findViewById(android.R.id.text1);
+                    TextView text2 = view.findViewById(android.R.id.text2);
 
-                text1.setText(nameLoc);
+                    String nameLoc = taskQueue.get(position).getTaskName(); // + " - " + taskList.get(position).getTaskLocationString()
 
-                String addTimeDist = taskQueue.get(position).getTaskAddress() + "\n" +
-                        taskQueue.get(position).getTaskTime();
+                    text1.setText(nameLoc);
 
-                if (!taskQueue.get(position).getTaskDistanceString().equals("")) {
-                    addTimeDist += " - " + taskQueue.get(position).getTaskDistanceString();
+                    String addTimeDist = taskQueue.get(position).getTaskAddress() + "\n" +
+                            taskQueue.get(position).getTaskTime();
+
+                    if (!taskQueue.get(position).getTaskDistanceString().equals("")) {
+                        addTimeDist += " - " + taskQueue.get(position).getTaskDistanceString();
+                    }
+
+                    text2.setLineSpacing(5f,1f);
+                    text2.setText(addTimeDist);
+
+                    return view;
                 }
+            };
+        }
 
-                text2.setLineSpacing(5f,1f);
-                text2.setText(addTimeDist);
+        if (taskListView.getAdapter() == null) {
+            taskListView.setAdapter(taskAdapter);
+        } else {
+            taskAdapter.notifyDataSetChanged();
+        }
 
-                return view;
-            }
-        };
-
-        taskListView.setAdapter(taskAdapter);
     }
 
 
