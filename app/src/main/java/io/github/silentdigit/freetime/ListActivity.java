@@ -79,7 +79,7 @@ public class ListActivity extends AppCompatActivity {
         UserTask sampleTaskSeven = new UserTask("Weekly Groceries", "Burwood Westfield", currentLocation,this);
         UserTask sampleTaskEight = new UserTask("SU:CC Meetup", "Bobbin Head", currentLocation,this);
         UserTask sampleTaskNine = new UserTask("Practice Skateboarding", "Darrell Jackson Gardens", currentLocation,this);
-        UserTask sampleTaskTen = new UserTask("SUEUA Pub Crawl", "The Royal Camperdown", currentLocation,this);
+        UserTask sampleTaskTen = new UserTask("SUEUA Pub Crawl", "The Royal Hotel Darlington", currentLocation,this);
         UserTask sampleTaskEleven = new UserTask("Engineering Ball", "Sheraton on the Park", currentLocation,this);
 
         taskQueue = new ArrayList<>();
@@ -130,10 +130,11 @@ public class ListActivity extends AppCompatActivity {
 
                 if (taskQueue != null && taskQueue.size() > 0) {
 
-
-                    for (UserTask task:taskQueue) {
-                        task.updateTravelData(currentLocation, getApplicationContext());
-                    }
+//                    if (currentLocation != null) {
+                        for (UserTask task : taskQueue) {
+                            task.updateTravelData(currentLocation, getApplicationContext());
+                        }
+//                    }
 
                     if (startup) {
                         startup = false;

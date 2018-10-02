@@ -107,12 +107,14 @@ public class UserTask implements Comparable<UserTask>, Parcelable {
             return;
         }
 
-        taskUpdate = new TransitDataTask();
-        String url = "https://maps.googleapis.com/maps/api/directions/json?origin=" +
-                currentLocation.getLatitude() + "," + currentLocation.getLongitude() +
-                "&destination=" + taskLocation.getLatitude() + "," + taskLocation.getLongitude() +
-                "&key=" + context.getString(R.string.google_maps_key) + "&mode=walking";
-        taskUpdate.execute(url);
+        if (taskLocation != null) {
+            taskUpdate = new TransitDataTask();
+            String url = "https://maps.googleapis.com/maps/api/directions/json?origin=" +
+                    currentLocation.getLatitude() + "," + currentLocation.getLongitude() +
+                    "&destination=" + taskLocation.getLatitude() + "," + taskLocation.getLongitude() +
+                    "&key=" + context.getString(R.string.google_maps_key) + "&mode=walking";
+            taskUpdate.execute(url);
+        }
     }
 
     public class TransitDataTask extends AsyncTask<String,Void,String> {
