@@ -16,11 +16,11 @@ Project Video:
 Concept Art:
 
 <p align="center">
-  <img src="https://maksimstojkovic.com/img/free-time-concept.png" width="50%">
+  <img src="https://maksimstojkovic.com/img/free-time-concept.png" width=60%">
 </p>
 
 Prototype Screenshots:
 
 <p align="center">
-  <img src="https://maksimstojkovic.com/img/free-time-interface.png" width="50%">
+  <img src="https://maksimstojkovic.com/img/free-time-interface.png" width="60%">
 </p>
