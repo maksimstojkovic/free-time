@@ -16,7 +16,7 @@ Concept Art:
   <img src="https://maksimstojkovic.com/img/free-time-concept.png" style="width:100%; max-width:500px;">
 </p>
 
-Prototype Screenshots:
+Prototype:
 
 <p align="center">
   <img src="https://maksimstojkovic.com/img/free-time-interface.png" style="width:100%; max-width:500px;">
