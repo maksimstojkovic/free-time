@@ -6,7 +6,7 @@ Project Video:
 
 <a href="https://www.youtube.com/watch?v=w9iOyOA5D_4">
 	<p align="center">
-		<img src="http://img.youtube.com/vi/w9iOyOA5D_4/0.jpg" alt="Free Time Project Video" style="width:100%; max-width:300px;">
+		<img src="https://img.youtube.com/vi/w9iOyOA5D_4/0.jpg" alt="Free Time Project Video" style="width:100%; max-width:300px;">
 	</p>
 </a>
 
