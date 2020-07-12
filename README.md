@@ -4,23 +4,20 @@ Free Time is an app that manages your daily tasks based on your current location
 
 Project Video:
 
-<a href="http://www.youtube.com/watch?v=w9iOyOA5D_4">
+<a href="https://www.youtube.com/watch?v=w9iOyOA5D_4">
 	<p align="center">
-		<img src="http://img.youtube.com/vi/w9iOyOA5D_4/0.jpg" alt="Free Time Project Video" width="50%">
+		<img src="http://img.youtube.com/vi/w9iOyOA5D_4/0.jpg" alt="Free Time Project Video" style="width:100%; max-width:300px;">
 	</p>
 </a>
-
-
-
 
 Concept Art:
 
 <p align="center">
-  <img src="https://maksimstojkovic.com/img/free-time-concept.png" width=60%">
+  <img src="https://maksimstojkovic.com/img/free-time-concept.png" style="width:100%; max-width:500px;">
 </p>
 
 Prototype Screenshots:
 
 <p align="center">
-  <img src="https://maksimstojkovic.com/img/free-time-interface.png" width="60%">
+  <img src="https://maksimstojkovic.com/img/free-time-interface.png" style="width:100%; max-width:500px;">
 </p>
